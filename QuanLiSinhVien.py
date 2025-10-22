@@ -7,8 +7,8 @@ import mysql.connector
 def connect_db(): 
     return mysql.connector.connect( 
         host="localhost", 
-        user="root",        # thay bằng user MySQL của bạn 
-        password="123456",        # thay bằng password MySQL của bạn 
+        user="root",        
+        password="123456",        
         database="qlsv" 
     ) 
 # ====== Hàm canh giữa cửa sổ ====== 
@@ -37,13 +37,14 @@ tk.Label(frame_info, text="Mã số").grid(row=0, column=0, padx=5, pady=5,
 sticky="w") 
 entry_maso = tk.Entry(frame_info, width=10) 
 entry_maso.grid(row=0, column=1, padx=5, pady=5, sticky="w") 
+
  
 tk.Label(frame_info, text="Khoa").grid(row=0, column=2, padx=5, pady=5, 
 sticky="w") 
-cbb_chucvu = ttk.Combobox(frame_info, values=[ 
+cbb_khoa = ttk.Combobox(frame_info, values=[ 
     "CNTT", "Kỹ Thuật Công Nghệ Môi Trường", "Du Lịch", "Nông Nghiệp", "Sư Phạm" 
 ], width=20) 
-cbb_chucvu.grid(row=0, column=3, padx=5, pady=5, sticky="w") 
+cbb_khoa.grid(row=0, column=3, padx=5, pady=5, sticky="w") 
  
 tk.Label(frame_info, text="Họ lót").grid(row=1, column=0, padx=5, pady=5, 
 sticky="w") 
@@ -65,23 +66,28 @@ sticky="w")
 date_entry = DateEntry(frame_info, width=12, background="darkblue", 
 foreground="white", date_pattern="yyyy-mm-dd") 
 date_entry.grid(row=2, column=3, padx=5, pady=5, sticky="w") 
+
+tk.Label(frame_info, text="Lớp").grid(row=0, column=4, padx=5, pady=5, 
+sticky="w") 
+entry_lop = tk.Entry(frame_info, width=10) 
+entry_lop.grid(row=0, column=6, padx=5, pady=5, sticky="w") 
  
 # ====== Bảng danh sách nhân viên ====== 
 lbl_ds = tk.Label(root, text="Danh sách nhân viên", font=("Arial", 10, "bold")) 
 lbl_ds.pack(pady=5, anchor="w", padx=10) 
  
-columns = ("MSSV", "holot", "ten", "phai", "ngaysinh", "chucvu") 
+columns = ("MSSV", "holot", "ten", "phai", "ngaysinh", "khoa") 
 tree = ttk.Treeview(root, columns=columns, show="headings", height=10) 
  
 for col in columns: 
     tree.heading(col, text=col.capitalize()) 
  
-tree.column("", width=60, anchor="center") 
+tree.column("MSSV", width=60, anchor="center") 
 tree.column("holot", width=150) 
 tree.column("ten", width=100) 
 tree.column("phai", width=70, anchor="center") 
 tree.column("ngaysinh", width=100, anchor="center") 
-tree.column("chucvu", width=150) 
+tree.column("khoa", width=150) 
  
 tree.pack(padx=10, pady=5, fill="both") 
  
@@ -92,7 +98,7 @@ def clear_input():
     entry_ten.delete(0, tk.END) 
     gender_var.set("Nam") 
     date_entry.set_date("2000-01-01") 
-    cbb_chucvu.set("") 
+    cbb_khoa.set("") 
  
 def load_data(): 
     for i in tree.get_children(): 
@@ -110,7 +116,7 @@ def them_nv():
     ten = entry_ten.get() 
     phai = gender_var.get() 
     ngaysinh = date_entry.get() 
-    chucvu = cbb_chucvu.get() 
+    khoa = cbb_khoa.get() 
  
     if maso == "" or holot == "" or ten == "": 
         messagebox.showwarning("Thiếu dữ liệu", "Vui lòng nhập đủ thông tin") 
@@ -120,7 +126,7 @@ def them_nv():
     cur = conn.cursor() 
     try: 
         cur.execute("INSERT INTO sinhvien VALUES (%s, %s, %s, %s, %s, %s)", 
-                    (maso, holot, ten, phai, ngaysinh, chucvu)) 
+                    (maso, holot, ten, phai, ngaysinh, khoa)) 
         conn.commit() 
         load_data() 
         clear_input() 
@@ -155,20 +161,20 @@ def sua_nv():
     entry_ten.insert(0, values[2]) 
     gender_var.set(values[3]) 
     date_entry.set_date(values[4]) 
-    cbb_chucvu.set(values[5]) 
+    cbb_khoa.set(values[5]) 
 def luu_nv(): 
     maso = entry_maso.get() 
     holot = entry_holot.get() 
     ten = entry_ten.get() 
     phai = gender_var.get() 
     ngaysinh = date_entry.get() 
-    chucvu = cbb_chucvu.get() 
+    khoa = cbb_khoa.get() 
     conn = connect_db() 
     cur = conn.cursor() 
     cur.execute("""UPDATE sinhvien SET holot=%s, ten=%s, phai=%s, ngaysinh=%s, 
-chucvu=%s  
+khoa=%s  
                    WHERE maso=%s""", 
-                (holot, ten, phai, ngaysinh, chucvu, maso)) 
+                (holot, ten, phai, ngaysinh, khoa, maso)) 
     conn.commit() 
     conn.close() 
     load_data() 
