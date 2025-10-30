@@ -60,7 +60,7 @@ def open_ChiTietDiem(main_root):
     tree.heading("Diem", text="Điểm (Hệ 10)")
 
     tree.column("MaMH", width=80, anchor="center")
-    tree.column("TenMH", width=250)
+    tree.column("TenMH", width=250, anchor="center")
     tree.column("SoTC", width=80, anchor="center")
     tree.column("Diem", width=80, anchor="center")
 
