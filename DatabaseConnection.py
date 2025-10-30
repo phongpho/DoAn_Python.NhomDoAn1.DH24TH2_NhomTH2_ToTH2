@@ -9,5 +9,3 @@ def connect_db():
         password="123456",        
         database="qlsv" 
     )
-
-print("hello")
