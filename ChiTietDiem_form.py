@@ -65,9 +65,7 @@ def open_ChiTietDiem(main_root):
     tree.column("Diem", width=80, anchor="center")
 
     tree.pack(padx=10, pady=5, fill="both", expand=True)
-
-    # ====== Chức năng (Các hàm con lồng bên trong) ======
-
+#===== Hàm xử lý ======
     student_data = {} 
     monhoc_data = {} 
     def load_cbb_sv():
