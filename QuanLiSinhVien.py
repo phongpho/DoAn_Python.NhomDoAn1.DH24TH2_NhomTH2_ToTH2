@@ -4,7 +4,8 @@ from tkcalendar import DateEntry
 import mysql.connector 
 from DatabaseConnection import connect_db
 from KetQuaHocTap_form import open_KQHT
-from ChiTietDiem_form import open_ChiTietDiem
+from ChiTietDiemTichLuy_form import open_ChiTietDiem
+from ChiTietDiemRenluyen_form import open_ChiTietDiemRenLuyen
  
 # ====== Hàm canh giữa cửa sổ ====== 
 def center_window(win, w=700, h=500): 
@@ -193,6 +194,8 @@ tk.Button(frame_btn, text="Kết quả học tập", width=20,
           command=lambda: open_KQHT(root)).grid(row=1, column=0, columnspan=2, pady=5)
 tk.Button(frame_btn, text="Chỉnh Sửa Điểm Tích Lũy", width=20, 
           command=lambda: open_ChiTietDiem(root)).grid(row=1, column=2, columnspan=2, pady=5)
+tk.Button(frame_btn, text="Chỉnh Sửa Điểm Rèn Luyện", width=20, 
+          command=lambda: open_ChiTietDiemRenLuyen(root)).grid(row=1, column=4, columnspan=2, pady=5)
  
 load_data() 
 root.mainloop()

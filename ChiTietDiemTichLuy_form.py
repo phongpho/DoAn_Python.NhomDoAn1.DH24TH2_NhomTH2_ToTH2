@@ -15,7 +15,7 @@ def center_window(win, w=750, h=550):
 def open_ChiTietDiem(main_root):
     
     form3_win = tk.Toplevel(main_root)
-    form3_win.title("Quản lý Điểm Chi Tiết")
+    form3_win.title("Quản lý Điểm Tích Lũy Chi Tiết")
     center_window(form3_win, 750, 550)
     form3_win.resizable(False, False)
     form3_win.grab_set()
@@ -28,19 +28,19 @@ def open_ChiTietDiem(main_root):
     frame_info = tk.Frame(form3_win)
     frame_info.pack(pady=5, padx=10, fill="x")
 
-    # ----- Hàng 1: Chọn Sinh viên và Môn học -----
-    tk.Label(frame_info, text="Chọn Sinh viên").grid(row=0, column=0, padx=5, pady=5, sticky="w")
-    cbb_sinhvien = ttk.Combobox(frame_info, width=30)
-    cbb_sinhvien.grid(row=0, column=1, padx=5, pady=5, sticky="w")
+    # ----- Hàng 1: Chọn Khoa và Sinh viên (Lọc) -----
+    tk.Label(frame_info, text="Chọn Khoa").grid(row=0, column=0, padx=5, pady=5, sticky="w")
+    cbb_khoa = ttk.Combobox(frame_info, width=30)
+    cbb_khoa.grid(row=0, column=1, padx=5, pady=5, sticky="w")
 
-    tk.Label(frame_info, text="Chọn Môn học (theo khoa)").grid(row=0, column=2, padx=5, pady=5, sticky="w")
-    cbb_monhoc = ttk.Combobox(frame_info, width=30)
-    cbb_monhoc.grid(row=0, column=3, padx=5, pady=5, sticky="w")
+    tk.Label(frame_info, text="Chọn Sinh viên").grid(row=0, column=2, padx=5, pady=5, sticky="w")
+    cbb_sinhvien = ttk.Combobox(frame_info, width=30)
+    cbb_sinhvien.grid(row=0, column=3, padx=5, pady=5, sticky="w")
     
-    # ----- Hàng 2: Hiển thị tên và Nhập điểm -----
-    tk.Label(frame_info, text="Sinh viên thuộc khoa").grid(row=1, column=0, padx=5, pady=5, sticky="w")
-    entry_khoa = tk.Entry(frame_info, width=32, state="readonly")
-    entry_khoa.grid(row=1, column=1, padx=5, pady=5, sticky="w")
+    # ----- Hàng 2: Chọn Môn học (Lọc) và Nhập điểm -----
+    tk.Label(frame_info, text="Chọn Môn học").grid(row=1, column=0, padx=5, pady=5, sticky="w")
+    cbb_monhoc = ttk.Combobox(frame_info, width=30)
+    cbb_monhoc.grid(row=1, column=1, padx=5, pady=5, sticky="w")
 
     tk.Label(frame_info, text="Điểm môn (Hệ 10)").grid(row=1, column=2, padx=5, pady=5, sticky="w")
     entry_diem = tk.Entry(frame_info, width=10)
@@ -48,7 +48,7 @@ def open_ChiTietDiem(main_root):
 
 
     # ====== Bảng danh sách điểm của sinh viên đã chọn ======
-    lbl_ds = tk.Label(form3_win, text="Danh sách điểm đã có", font=("Arial", 10, "bold"))
+    lbl_ds = tk.Label(form3_win, text="Danh sách điểm đã có (chọn sinh viên để xem)", font=("Arial", 10, "bold"))
     lbl_ds.pack(pady=5, anchor="w", padx=10)
 
     columns = ("MaMH", "TenMH", "SoTC", "Diem")
@@ -65,28 +65,40 @@ def open_ChiTietDiem(main_root):
     tree.column("Diem", width=80, anchor="center")
 
     tree.pack(padx=10, pady=5, fill="both", expand=True)
-#===== Hàm xử lý ======
+    
+    # ===== Hàm xử lý ======
+    
+    # student_data sẽ lưu: { "B20... - Tên": "B20..." }
     student_data = {} 
     monhoc_data = {} 
-    def load_cbb_sv():
+    
+    def load_cbb_khoa():
         try:
             conn = connect_db()
             cur = conn.cursor()
+            cur.execute("SELECT DISTINCT khoa FROM sinhvien WHERE khoa IS NOT NULL AND khoa != ''")
+            khoa_list = [row[0] for row in cur.fetchall()]
+            cbb_khoa['values'] = khoa_list
+            conn.close()
+        except Exception as e:
+            messagebox.showerror("Lỗi CSDL", f"Không thể tải ComboBox Khoa: {e}", parent=form3_win)
 
-            cur.execute("SELECT mssv, hoten, khoa FROM sinhvien") 
+    def load_cbb_sv(khoa_sv):
+        try:
+            conn = connect_db()
+            cur = conn.cursor()
+            cur.execute("SELECT mssv, hoten FROM sinhvien WHERE khoa = %s", (khoa_sv,))
+            
             sv_list = []
             student_data.clear()
             
-            for mssv, hoten, khoa in cur.fetchall():
+            for mssv, hoten in cur.fetchall():
                 temp_str = f"{mssv} - {hoten}"
-                student_data[temp_str] = (mssv, khoa) 
+                student_data[temp_str] = mssv 
                 sv_list.append(temp_str)
+                
             cbb_sinhvien['values'] = sv_list
-            
-            monhoc_data.clear()
-            cbb_monhoc['values'] = []
-            cbb_monhoc.set("")
-
+            cbb_sinhvien.set("")
             conn.close()
         except Exception as e:
             messagebox.showerror("Lỗi CSDL", f"Không thể tải ComboBox Sinh viên: {e}", parent=form3_win)
@@ -99,7 +111,6 @@ def open_ChiTietDiem(main_root):
             
             conn = connect_db()
             cur = conn.cursor()
-            
             cur.execute("SELECT mamh, tenmh FROM monhoc WHERE makhoa = %s", (khoa_sv,))
             
             mh_list = []
@@ -107,42 +118,33 @@ def open_ChiTietDiem(main_root):
                 temp_str = f"{mamh} - {tenmh}"
                 monhoc_data[temp_str] = mamh 
                 mh_list.append(temp_str)
-            
             cbb_monhoc['values'] = mh_list
-
             conn.close()
         except Exception as e:
             messagebox.showerror("Lỗi CSDL", f"Không thể tải ComboBox Môn học: {e}", parent=form3_win)
 
+    def on_khoa_select(event):
+        khoa_chon = cbb_khoa.get()
+        if not khoa_chon:
+            return
+            
+        load_cbb_sv(khoa_chon)      
+        load_monhoc_cbb(khoa_chon)  
+        
+        entry_diem.delete(0, tk.END)
+        for i in tree.get_children():
+            tree.delete(i)
+
     def on_student_select(event):
         selected_display = cbb_sinhvien.get()
+        mssv = student_data.get(selected_display) # Lấy MSSV từ dict
         
-        student_info = student_data.get(selected_display) 
-        
-        if not student_info:
-            entry_khoa.config(state="normal")
-            entry_khoa.delete(0, tk.END)
-            entry_khoa.config(state="readonly")
-            
+        if not mssv:
+            # Xóa bảng
             for i in tree.get_children():
                 tree.delete(i)
-                
-            monhoc_data.clear()
-            cbb_monhoc['values'] = []
-            cbb_monhoc.set("")
             return
-
- 
-        mssv = student_info[0]
-        khoa_sv = student_info[1]
-
-        entry_khoa.config(state="normal")
-        entry_khoa.delete(0, tk.END)
-        entry_khoa.insert(0, khoa_sv)
-        entry_khoa.config(state="readonly")
-        
-        load_monhoc_cbb(khoa_sv)
-        
+            
         load_tree_data(mssv)
 
     def load_tree_data(mssv):
@@ -152,10 +154,10 @@ def open_ChiTietDiem(main_root):
         try:
             conn = connect_db()
             cur = conn.cursor()
-            sql = """SELECT mh.mamh, mh.tenmh, mh.sotc, kq.diem_mon
-                     FROM ketqua kq
-                     JOIN monhoc mh ON kq.mamh = mh.mamh
-                     WHERE kq.mssv = %s"""
+            sql = """SELECT mh.mamh, mh.tenmh, mh.sotc, tl.diem_mon
+                     FROM diem_tichluy tl
+                     JOIN monhoc mh ON tl.mamh = mh.mamh
+                     WHERE tl.mssv = %s"""
             cur.execute(sql, (mssv,))
             
             for row in cur.fetchall():
@@ -165,27 +167,25 @@ def open_ChiTietDiem(main_root):
             messagebox.showerror("Lỗi CSDL", f"Không thể tải bảng điểm: {e}", parent=form3_win)
 
     def clear_input():
+        cbb_khoa.set("")
         cbb_sinhvien.set("")
+        cbb_sinhvien['values'] = []
         cbb_monhoc.set("")
+        cbb_monhoc['values'] = []
         entry_diem.delete(0, tk.END)
         
-        entry_khoa.config(state="normal")
-        entry_khoa.delete(0, tk.END)
-        entry_khoa.config(state="readonly")
+        student_data.clear()
+        monhoc_data.clear()
         
         for i in tree.get_children():
             tree.delete(i)
-            
-        monhoc_data.clear()
-        cbb_monhoc['values'] = []
 
     def update_dtl(cursor, mssv):
-
         sql_cal_dtl = """
-            SELECT SUM(kq.diem_mon * mh.sotc) / SUM(mh.sotc)
-            FROM ketqua kq
-            JOIN monhoc mh ON kq.mamh = mh.mamh
-            WHERE kq.mssv = %s
+            SELECT SUM(tl.diem_mon * mh.sotc) / SUM(mh.sotc)
+            FROM diem_tichluy tl
+            JOIN monhoc mh ON tl.mamh = mh.mamh
+            WHERE tl.mssv = %s
         """
         cursor.execute(sql_cal_dtl, (mssv,))
         result = cursor.fetchone()
@@ -200,13 +200,11 @@ def open_ChiTietDiem(main_root):
         selected_mh = cbb_monhoc.get()
         diem_str = entry_diem.get()
         
-        student_info = student_data.get(selected_sv)
-        mssv = student_info[0] if student_info else None
-        
+        mssv = student_data.get(selected_sv) 
         mamh = monhoc_data.get(selected_mh)
         
         if not mssv or not mamh:
-            messagebox.showwarning("Thiếu thông tin", "Vui lòng chọn Sinh viên và Môn học.", parent=form3_win)
+            messagebox.showwarning("Thiếu thông tin", "Vui lòng chọn Khoa, Sinh viên và Môn học.", parent=form3_win)
             return
         
         try:
@@ -222,27 +220,26 @@ def open_ChiTietDiem(main_root):
             conn = connect_db()
             cur = conn.cursor()
             
-            cur.execute("SELECT COUNT(*) FROM ketqua WHERE mssv = %s AND mamh = %s", (mssv, mamh))
+            cur.execute("SELECT COUNT(*) FROM diem_tichluy WHERE mssv = %s AND mamh = %s", (mssv, mamh))
             exists = cur.fetchone()[0]
             
             if exists:
-
                 if messagebox.askyesno("Xác nhận", "Sinh viên đã có điểm môn này. Bạn muốn cập nhật?", parent=form3_win):
-                    cur.execute("UPDATE ketqua SET diem_mon = %s WHERE mssv = %s AND mamh = %s", (diem_mon, mssv, mamh))
+                    cur.execute("UPDATE diem_tichluy SET diem_mon = %s WHERE mssv = %s AND mamh = %s", (diem_mon, mssv, mamh))
                 else:
                     conn.close()
                     return
             else:
-                cur.execute("INSERT INTO ketqua (mssv, mamh, diem_mon) VALUES (%s, %s, %s)", (mssv, mamh, diem_mon))
+                cur.execute("INSERT INTO diem_tichluy (mssv, mamh, diem_mon) VALUES (%s, %s, %s)", (mssv, mamh, diem_mon))
             
             update_dtl(cur, mssv)
-            
             conn.commit()
+            
             messagebox.showinfo("Thành công", "Lưu điểm và cập nhật DTL thành công!", parent=form3_win)
             
             load_tree_data(mssv)
-            cbb_monhoc.set("")
-            entry_diem.delete(0, tk.END)
+            cbb_monhoc.set("")   
+            entry_diem.delete(0, tk.END) 
 
         except Exception as e:
             if conn:
@@ -253,6 +250,7 @@ def open_ChiTietDiem(main_root):
                 conn.close()
 
     def xoa_diem():
+
         selected_item = tree.selection()
         if not selected_item:
             messagebox.showwarning("Chưa chọn", "Vui lòng chọn một môn học trong bảng để xóa.", parent=form3_win)
@@ -262,9 +260,9 @@ def open_ChiTietDiem(main_root):
         mamh = values[0]
         tenmh = values[1]
         
-        student_info = student_data.get(cbb_sinhvien.get())
-        mssv = student_info[0] if student_info else None
+        mssv = student_data.get(cbb_sinhvien.get()) 
         if not mssv:
+            messagebox.showwarning("Lỗi", "Không tìm thấy sinh viên đang chọn.", parent=form3_win)
             return 
 
         if not messagebox.askyesno("Xác nhận xóa", f"Bạn có chắc muốn xóa điểm môn '{tenmh}' của sinh viên này không?", parent=form3_win):
@@ -275,12 +273,12 @@ def open_ChiTietDiem(main_root):
             conn = connect_db()
             cur = conn.cursor()
             
-            cur.execute("DELETE FROM ketqua WHERE mssv = %s AND mamh = %s", (mssv, mamh))
-            update_dtl(cur, mssv)
+            cur.execute("DELETE FROM diem_tichluy WHERE mssv = %s AND mamh = %s", (mssv, mamh))
+            update_dtl(cur, mssv) 
             conn.commit()
             
             messagebox.showinfo("Thành công", "Đã xóa điểm và cập nhật lại DTL.", parent=form3_win)
-            load_tree_data(mssv)
+            load_tree_data(mssv) 
 
         except Exception as e:
             if conn:
@@ -300,7 +298,9 @@ def open_ChiTietDiem(main_root):
     tk.Button(frame_btn, text="Hủy", width=10, command=clear_input).grid(row=0, column=2, padx=10)
     tk.Button(frame_btn, text="Thoát", width=10, command=form3_win.destroy).grid(row=0, column=3, padx=10)
 
-    load_cbb_sv() 
+    # ====== Tải dữ liệu ban đầu ======
+    load_cbb_khoa()
     
+    # ====== Gán sự kiện ======
+    cbb_khoa.bind("<<ComboboxSelected>>", on_khoa_select)
     cbb_sinhvien.bind("<<ComboboxSelected>>", on_student_select)
-    cbb_sinhvien.bind("<FocusOut>", on_student_select) 
