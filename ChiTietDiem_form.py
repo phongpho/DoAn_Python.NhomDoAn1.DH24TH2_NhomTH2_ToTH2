@@ -78,9 +78,9 @@ def open_ChiTietDiem(main_root):
             student_data.clear()
             
             for mssv, hoten, khoa in cur.fetchall():
-                display_str = f"{mssv} - {hoten}"
-                student_data[display_str] = (mssv, khoa) 
-                sv_list.append(display_str)
+                temp_str = f"{mssv} - {hoten}"
+                student_data[temp_str] = (mssv, khoa) 
+                sv_list.append(temp_str)
             cbb_sinhvien['values'] = sv_list
             
             monhoc_data.clear()
@@ -104,9 +104,9 @@ def open_ChiTietDiem(main_root):
             
             mh_list = []
             for mamh, tenmh in cur.fetchall():
-                display_str = f"{mamh} - {tenmh}"
-                monhoc_data[display_str] = mamh 
-                mh_list.append(display_str)
+                temp_str = f"{mamh} - {tenmh}"
+                monhoc_data[temp_str] = mamh 
+                mh_list.append(temp_str)
             
             cbb_monhoc['values'] = mh_list
 
