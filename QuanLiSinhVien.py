@@ -131,15 +131,42 @@ def them_sv():
 def xoa_sv(): 
     selected = tree.selection() 
     if not selected: 
-        messagebox.showwarning("Chưa chọn", "Hãy chọn nhân viên để xóa") 
+        messagebox.showwarning("Chưa chọn", "Hãy chọn sinh viên để xóa", parent=root) 
         return 
+        
+    # Thêm bước xác nhận cho an toàn
+    if not messagebox.askyesno("Xác nhận xóa", 
+                             "Bạn có chắc muốn xóa sinh viên này?\n(TOÀN BỘ điểm tích lũy và điểm rèn luyện của sinh viên này cũng sẽ bị xóa vĩnh viễn)", 
+                             parent=root):
+        return
+        
     mssv = tree.item(selected)["values"][0] 
-    conn = connect_db() 
-    cur = conn.cursor() 
-    cur.execute("DELETE FROM sinhvien WHERE mssv=%s", (mssv,)) 
-    conn.commit() 
-    conn.close() 
-    load_data()
+    
+    conn = None # Khởi tạo conn
+    try:
+        conn = connect_db() 
+        cur = conn.cursor() 
+    
+        cur.execute("DELETE FROM diem_tichluy WHERE mssv=%s", (mssv,)) 
+        
+        cur.execute("DELETE FROM diem_renluyen WHERE mssv=%s", (mssv,))
+        
+        cur.execute("DELETE FROM sinhvien WHERE mssv=%s", (mssv,)) 
+        
+        conn.commit() 
+        messagebox.showinfo("Thành công", "Đã xóa sinh viên và toàn bộ điểm liên quan.", parent=root)
+        
+        load_data()
+        clear_input()
+        
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        messagebox.showerror("Lỗi CSDL", f"Không thể xóa: {e}", parent=root)
+        
+    finally:
+        if conn:
+            conn.close()
 
 def sua_sv(): 
     selected = tree.selection() 
