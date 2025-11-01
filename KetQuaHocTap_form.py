@@ -62,11 +62,12 @@ def open_KQHT(main_root):
     # ===== Hàm chức năng =====
     sinhvien_data = {} 
     
-    def load_tree_data(khoa_filter=None, mssv_filter=None):
+    def load_tree_data(khoa_filter=None, mssv_filter=None, load_all=False): 
+        """Tải dữ liệu lên Treeview, lọc theo khoa, mssv HOẶC tải tất cả"""
         for i in tree.get_children():
             tree.delete(i)
         
-        if not khoa_filter and not mssv_filter:
+        if not khoa_filter and not mssv_filter and not load_all:
             return 
             
         try:
@@ -76,10 +77,10 @@ def open_KQHT(main_root):
             sql = "SELECT mssv, hoten, khoa, lop, drl, dtl FROM sinhvien"
             params = ()
             
-            if mssv_filter:
+            if mssv_filter and not load_all:
                 sql += " WHERE mssv = %s"
                 params = (mssv_filter,)
-            elif khoa_filter:
+            elif khoa_filter and not load_all:
                 sql += " WHERE khoa = %s"
                 params = (khoa_filter,)
             
@@ -150,7 +151,15 @@ def open_KQHT(main_root):
         for i in tree.get_children():
             tree.delete(i)
 
-    # Gán sự kiện (bind)
+    def tai_tat_ca():
+        cbb_khoa.set("")
+        cbb_sinhvien['values'] = []
+        cbb_sinhvien.set("")
+        sinhvien_data.clear()
+        
+        load_tree_data(load_all=True)
+
+
     cbb_khoa.bind("<<ComboboxSelected>>", khoa_select)
     cbb_sinhvien.bind("<<ComboboxSelected>>", sinhvien_select)
 
@@ -158,8 +167,9 @@ def open_KQHT(main_root):
     frame_btn = tk.Frame(form2_win)
     frame_btn.pack(pady=10)
 
-    tk.Button(frame_btn, text="Reset", width=10, command=reset_view).grid(row=0, column=0, padx=10)
-    tk.Button(frame_btn, text="Thoát", width=10, command=form2_win.destroy).grid(row=0, column=1, padx=10)
+    tk.Button(frame_btn, text="Tải Tất Cả", width=10, command=tai_tat_ca).grid(row=0, column=0, padx=10)
+    tk.Button(frame_btn, text="Xóa Bảng", width=10, command=reset_view).grid(row=0, column=1, padx=10)
+    tk.Button(frame_btn, text="Thoát", width=10, command=form2_win.destroy).grid(row=0, column=2, padx=10)
 
     # ====== Tải dữ liệu ban đầu ======
     load_cbb_khoa()

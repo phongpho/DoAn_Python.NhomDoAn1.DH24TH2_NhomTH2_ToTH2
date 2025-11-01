@@ -205,6 +205,8 @@ def luu_sv():
     conn.close()
     load_data()
     clear_input()
+
+
 # ====== Frame nút ====== 
 frame_btn = tk.Frame(root) 
 frame_btn.pack(pady=5) 
