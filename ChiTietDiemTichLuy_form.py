@@ -4,41 +4,82 @@ import mysql.connector
 from DatabaseConnection import connect_db
 from DatabaseConnection import center_window
 
-def open_ChiTietDiem(main_root):
+def open_ChiTietDiemTichLuy(main_root):
     
     form3_win = tk.Toplevel(main_root)
     form3_win.title("Quản lý Điểm Tích Lũy Chi Tiết")
-    center_window(form3_win, 750, 550)
+    center_window(form3_win, 1200, 700) 
     form3_win.resizable(False, False)
     form3_win.grab_set()
+    form3_win.config(bg="white")
 
-    lbl_title = tk.Label(form3_win, text="QUẢN LÝ ĐIỂM CHI TIẾT", font=("Arial", 18, "bold"))
-    lbl_title.pack(pady=10)
+    frame_sidebar = tk.Frame(form3_win, relief=tk.RIDGE, bd=2, padx=10, pady=10, bg="#EAF2F8")
+    frame_sidebar.pack(side=tk.LEFT, fill=tk.Y, padx=10, pady=10)
 
-    frame_info = tk.Frame(form3_win)
-    frame_info.pack(pady=5, padx=10, fill="x")
+    lbl_sidebar_title = tk.Label(frame_sidebar, text="NHẬP ĐIỂM", 
+                                 font=("Arial", 16, "bold"), 
+                                 bg="#2874A6", fg="white")
+    lbl_sidebar_title.pack(pady=(5, 15), fill=tk.X)
 
-    tk.Label(frame_info, text="Chọn Khoa").grid(row=0, column=0, padx=5, pady=5, sticky="w")
+    frame_info = tk.Frame(frame_sidebar, bg="#EAF2F8")
+    frame_info.pack(pady=5, padx=10)
+
+    tk.Label(frame_info, text="Chọn Khoa", bg="#EAF2F8", fg="#333333").grid(row=0, column=0, padx=5, pady=10, sticky="w")
     cbb_khoa = ttk.Combobox(frame_info, width=30)
-    cbb_khoa.grid(row=0, column=1, padx=5, pady=5, sticky="w")
+    cbb_khoa.grid(row=0, column=1, padx=5, pady=10, sticky="w")
 
-    tk.Label(frame_info, text="Chọn Sinh viên").grid(row=0, column=2, padx=5, pady=5, sticky="w")
+    tk.Label(frame_info, text="Chọn Sinh viên", bg="#EAF2F8", fg="#333333").grid(row=1, column=0, padx=5, pady=10, sticky="w")
     cbb_sinhvien = ttk.Combobox(frame_info, width=30)
-    cbb_sinhvien.grid(row=0, column=3, padx=5, pady=5, sticky="w")
+    cbb_sinhvien.grid(row=1, column=1, padx=5, pady=10, sticky="w")
     
-    tk.Label(frame_info, text="Chọn Môn học").grid(row=1, column=0, padx=5, pady=5, sticky="w")
+    tk.Label(frame_info, text="Chọn Môn học", bg="#EAF2F8", fg="#333333").grid(row=2, column=0, padx=5, pady=10, sticky="w")
     cbb_monhoc = ttk.Combobox(frame_info, width=30)
-    cbb_monhoc.grid(row=1, column=1, padx=5, pady=5, sticky="w")
+    cbb_monhoc.grid(row=2, column=1, padx=5, pady=10, sticky="w")
 
-    tk.Label(frame_info, text="Điểm môn (Hệ 10)").grid(row=1, column=2, padx=5, pady=5, sticky="w")
+    tk.Label(frame_info, text="Điểm môn (Hệ 10)", bg="#EAF2F8", fg="#333333").grid(row=3, column=0, padx=5, pady=10, sticky="w")
     entry_diem = tk.Entry(frame_info, width=10)
-    entry_diem.grid(row=1, column=3, padx=5, pady=5, sticky="w")
+    entry_diem.grid(row=3, column=1, padx=5, pady=10, sticky="w")
 
-    lbl_ds = tk.Label(form3_win, text="Danh sách điểm đã có (chọn sinh viên để xem)", font=("Arial", 10, "bold"))
+    frame_btn = tk.Frame(frame_sidebar, bg="#EAF2F8")
+    frame_btn.pack(pady=20, fill=tk.X)
+
+    tk.Button(frame_btn, text="Lưu Điểm", command=lambda: luu_diem(), 
+              bg="#28A745", fg="white", relief=tk.FLAT, font=("Arial", 9, "bold"), height=2).pack(fill=tk.X, pady=4)
+    tk.Button(frame_btn, text="Xóa Điểm", command=lambda: xoa_diem(), 
+              bg="#DC3545", fg="white", relief=tk.FLAT, font=("Arial", 9, "bold"), height=2).pack(fill=tk.X, pady=4)
+    tk.Button(frame_btn, text="Hủy", command=lambda: clear_input(), 
+              bg="#6C757D", fg="white", relief=tk.FLAT, font=("Arial", 9, "bold"), height=2).pack(fill=tk.X, pady=4)
+    tk.Button(frame_btn, text="Thoát", command=form3_win.destroy, 
+              bg="#6C757D", fg="white", relief=tk.FLAT, font=("Arial", 9, "bold"), height=2).pack(fill=tk.X, pady=4)
+
+    frame_main = tk.Frame(form3_win, padx=10, pady=10, bg="white") 
+    frame_main.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+
+    lbl_title = tk.Label(frame_main, text="QUẢN LÝ ĐIỂM CHI TIẾT", 
+                         font=("Arial", 18, "bold"), bg="white", fg="#2874A6")
+    lbl_title.pack(pady=(5, 15)) 
+
+    lbl_ds = tk.Label(frame_main, text="Danh sách điểm đã có (chọn sinh viên để xem)", 
+                      font=("Arial", 10, "bold"), bg="white", fg="#333333")
     lbl_ds.pack(pady=5, anchor="w", padx=10)
 
+    style = ttk.Style(form3_win)
+    style.theme_use("default") 
+    style.configure("Treeview", 
+                    background="white", 
+                    fieldbackground="white", 
+                    foreground="black",
+                    rowheight=25,
+                    bd=1, relief=tk.SOLID)
+    style.map("Treeview", background=[('selected', '#AED6F1')]) 
+    style.configure("Treeview.Heading", 
+                    font=("Arial", 10, "bold"), 
+                    background="#EAF2F8", 
+                    foreground="black",
+                    relief=tk.FLAT)
+
     columns = ("MaMH", "TenMH", "SoTC", "Diem")
-    tree = ttk.Treeview(form3_win, columns=columns, show="headings", height=10)
+    tree = ttk.Treeview(frame_main, columns=columns, show="headings", height=10)
 
     tree.heading("MaMH", text="Mã Môn Học")
     tree.heading("TenMH", text="Tên Môn Học")
@@ -46,12 +87,12 @@ def open_ChiTietDiem(main_root):
     tree.heading("Diem", text="Điểm (Hệ 10)")
 
     tree.column("MaMH", width=80, anchor="center")
-    tree.column("TenMH", width=250, anchor="center")
+    tree.column("TenMH", width=250)
     tree.column("SoTC", width=80, anchor="center")
     tree.column("Diem", width=80, anchor="center")
 
     tree.pack(padx=10, pady=5, fill="both", expand=True)
-    #Hàm xử lý
+    
     student_data = {} 
     monhoc_data = {} 
     
@@ -111,8 +152,8 @@ def open_ChiTietDiem(main_root):
         if not khoa_chon:
             return
             
-        load_cbb_sv(khoa_chon)      
-        load_monhoc_cbb(khoa_chon)  
+        load_cbb_sv(khoa_chon) 
+        load_monhoc_cbb(khoa_chon) 
         
         entry_diem.delete(0, tk.END)
         for i in tree.get_children():
@@ -220,7 +261,7 @@ def open_ChiTietDiem(main_root):
             messagebox.showinfo("Thành công", "Lưu điểm và cập nhật DTL thành công!", parent=form3_win)
             
             load_tree_data(mssv)
-            cbb_monhoc.set("")   
+            cbb_monhoc.set("") 
             entry_diem.delete(0, tk.END) 
 
         except Exception as e:
@@ -232,7 +273,6 @@ def open_ChiTietDiem(main_root):
                 conn.close()
 
     def xoa_diem():
-
         selected_item = tree.selection()
         if not selected_item:
             messagebox.showwarning("Chưa chọn", "Vui lòng chọn một môn học trong bảng để xóa.", parent=form3_win)
@@ -270,19 +310,7 @@ def open_ChiTietDiem(main_root):
             if conn:
                 conn.close()
 
-
-    #nút
-    frame_btn = tk.Frame(form3_win)
-    frame_btn.pack(pady=10)
-
-    tk.Button(frame_btn, text="Lưu Điểm", width=10, command=luu_diem).grid(row=0, column=0, padx=10)
-    tk.Button(frame_btn, text="Xóa Điểm", width=10, command=xoa_diem).grid(row=0, column=1, padx=10)
-    tk.Button(frame_btn, text="Hủy", width=10, command=clear_input).grid(row=0, column=2, padx=10)
-    tk.Button(frame_btn, text="Thoát", width=10, command=form3_win.destroy).grid(row=0, column=3, padx=10)
-
-    #click
     cbb_khoa.bind("<<ComboboxSelected>>", on_khoa_select)
     cbb_sinhvien.bind("<<ComboboxSelected>>", on_student_select)
     
     load_cbb_khoa()
-    
