@@ -7,7 +7,7 @@ from DatabaseConnection import center_window
 def open_KQHT(main_root):
     form2_win = tk.Toplevel(main_root)
     form2_win.title("Tra cứu Kết quả Học tập")
-    center_window(form2_win, 700, 500)
+    center_window(form2_win, 800, 500)
     form2_win.resizable(False, False)
     form2_win.grab_set()
 
@@ -28,7 +28,7 @@ def open_KQHT(main_root):
     lbl_ds = tk.Label(form2_win, text="Bảng điểm tổng hợp", font=("Arial", 10, "bold"))
     lbl_ds.pack(pady=5, anchor="w", padx=10)
 
-    columns = ("Mssv", "Họ và tên", "Khoa", "Lớp", "DRL", "DTL")
+    columns = ("Mssv", "Họ và tên", "Khoa", "Lớp", "DRL", "DTL", "XepLoai")
     tree = ttk.Treeview(form2_win, columns=columns, show="headings", height=10)
     
     tree.heading("Mssv", text="MSSV")
@@ -37,6 +37,7 @@ def open_KQHT(main_root):
     tree.heading("Lớp", text="Lớp")
     tree.heading("DRL", text="Điểm Rèn Luyện")
     tree.heading("DTL", text="Điểm Tích Lũy")
+    tree.heading("XepLoai", text="Xếp Loại")
 
     tree.column("Mssv", width=80, anchor="center")
     tree.column("Họ và tên", width=150)
@@ -44,6 +45,7 @@ def open_KQHT(main_root):
     tree.column("Lớp", width=80, anchor="center")
     tree.column("DRL", width=100, anchor="center")
     tree.column("DTL", width=100, anchor="center")
+    tree.column("XepLoai", width=100, anchor="center")
     
     tree.pack(padx=10, pady=5, fill="both", expand=True)
 
@@ -51,7 +53,6 @@ def open_KQHT(main_root):
     sinhvien_data = {} 
     
     def load_tree_data(khoa_filter=None, mssv_filter=None, load_all=False): 
-        """Tải dữ liệu lên Treeview, lọc theo khoa, mssv HOẶC tải tất cả"""
         for i in tree.get_children():
             tree.delete(i)
         
@@ -74,7 +75,14 @@ def open_KQHT(main_root):
             
             cur.execute(sql, params)
             for row in cur.fetchall():
-                tree.insert("", tk.END, values=row)
+                drl = row[4]
+                dtl = row[5]
+
+                loai = xep_loai_hoc_tap(dtl, drl)
+
+                values_with_xeploai = row + (loai,)
+
+                tree.insert("", tk.END, values=values_with_xeploai)
             conn.close()
         except Exception as e:
             messagebox.showerror("Lỗi CSDL", f"Không thể tải bảng điểm: {e}", parent=form2_win)
@@ -147,7 +155,41 @@ def open_KQHT(main_root):
         
         load_tree_data(load_all=True)
 
+    def xep_loai_hoc_tap(dtl, drl):
 
+        if drl < 50:
+            return "Yếu (DRL < 50)"
+
+
+        if dtl >= 9.0:
+            dtl_he_4 = 4.0
+        elif dtl >= 8.5:
+            dtl_he_4 = 3.7
+        elif dtl >= 8.0:
+            dtl_he_4 = 3.5
+        elif dtl >= 7.0:
+            dtl_he_4 = 3.0
+        elif dtl >= 6.5:
+            dtl_he_4 = 2.5
+        elif dtl >= 5.5:
+            dtl_he_4 = 2.0
+        elif dtl >= 5.0:
+            dtl_he_4 = 1.5
+        elif dtl >= 4.0:
+            dtl_he_4 = 1.0
+        else:
+            dtl_he_4 = 0.0
+
+        if dtl_he_4 >= 3.6:
+            return "Xuất sắc"
+        elif dtl_he_4 >= 3.2:
+            return "Giỏi"
+        elif dtl_he_4 >= 2.5:
+            return "Khá"
+        elif dtl_he_4 >= 2.0:
+            return "Trung bình"
+        else:
+            return "Yếu"
     cbb_khoa.bind("<<ComboboxSelected>>", khoa_select)
     cbb_sinhvien.bind("<<ComboboxSelected>>", sinhvien_select)
 
