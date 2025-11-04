@@ -2,16 +2,8 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import mysql.connector
 from DatabaseConnection import connect_db
+from DatabaseConnection import center_window
 
-# ====== Hàm canh giữa cửa sổ ======
-def center_window(win, w=750, h=550):
-    ws = win.winfo_screenwidth()
-    hs = win.winfo_screenheight()
-    x = (ws // 2) - (w // 2)
-    y = (hs // 2) - (h // 2)
-    win.geometry(f'{w}x{h}+{x}+{y}')
-
-# ====== HÀM CHÍNH ĐỂ MỞ FORM 4 ======
 def open_ChiTietDiemRenLuyen(main_root):
 
     form4_win  = tk.Toplevel(main_root)
@@ -20,15 +12,12 @@ def open_ChiTietDiemRenLuyen(main_root):
     form4_win.resizable(False, False)
     form4_win.grab_set()
 
-    # ====== Tiêu đề (SỬA LỖI 2) ======
     lbl_title = tk.Label(form4_win, text="QUẢN LÝ ĐIỂM RÈN LUYỆN", font=("Arial", 18, "bold"))
     lbl_title.pack(pady=10)
 
-    # ====== Frame nhập thông tin  ======
     frame_info = tk.Frame(form4_win)
     frame_info.pack(pady=5, padx=10, fill="x")
 
-    # Hàng 1
     tk.Label(frame_info, text="Chọn Khoa").grid(row=0, column=0, padx=5, pady=5, sticky="w")
     cbb_khoa = ttk.Combobox(frame_info, width=30)
     cbb_khoa.grid(row=0, column=1, padx=5, pady=5, sticky="w")
@@ -38,11 +27,9 @@ def open_ChiTietDiemRenLuyen(main_root):
     cbb_sinhvien.grid(row=0, column=3, padx=5, pady=5, sticky="w")
 
     tk.Label(frame_info, text="Chọn Học Kỳ").grid(row=1, column=0, padx=5, pady=5, sticky="w")
-    # Đặt tên biến là cbb_hocky
     cbb_hocky = ttk.Combobox(frame_info, width=30)
     cbb_hocky.grid(row=1, column=1, padx=5, pady=5, sticky="w")
     
-    # --- THAY THẾ DANH SÁCH HỌC KỲ Ở ĐÂY ---
     hocky_list = [
         "Học kỳ 1 (Năm 1)",
         "Học kỳ 2 (Năm 1)",
@@ -55,18 +42,16 @@ def open_ChiTietDiemRenLuyen(main_root):
     ]
     cbb_hocky['values'] = hocky_list
 
-    tk.Label(frame_info, text="Nhập điểm rèn luyện").grid(row=1, column=2, padx=5, pady=5, sticky="w") # Sửa col
+    tk.Label(frame_info, text="Nhập điểm rèn luyện").grid(row=1, column=2, padx=5, pady=5, sticky="w")
     entry_diem = tk.Entry(frame_info, width=10)
-    entry_diem.grid(row=1, column=3, padx=5, pady=5, sticky="w") # Sửa col
+    entry_diem.grid(row=1, column=3, padx=5, pady=5, sticky="w")
 
-    # ====== Bảng danh sách điểm của sinh viên đã chọn ======
     lbl_ds = tk.Label(form4_win, text="Danh sách điểm đã có (chọn sinh viên để xem)", font=("Arial", 10, "bold"))
     lbl_ds.pack(pady=5, anchor="w", padx=10)
 
     columns = ("Mssv", "Hoten", "Hocky", "Diemrenluyen")
     tree = ttk.Treeview(form4_win, columns=columns, show="headings", height=10)
 
-    # SỬA LỖI 5: Sửa tiêu đề cột
     tree.heading("Mssv", text="MSSV")
     tree.heading("Hoten", text="Họ tên")
     tree.heading("Hocky", text="Học kỳ")
@@ -78,10 +63,8 @@ def open_ChiTietDiemRenLuyen(main_root):
     tree.column("Diemrenluyen", width=100, anchor="center")
 
     tree.pack(padx=10, pady=5, fill="both", expand=True)
-
-    # ===== Hàm xử lý ======
-    student_data = {} 
-    
+    #Hàm xử lý
+    student_data = {}  
     def load_cbb_khoa():
         try:
             conn = connect_db()
@@ -242,7 +225,6 @@ def open_ChiTietDiemRenLuyen(main_root):
                 conn.close()
 
     def xoa_drl():
-        """(THÊM HÀM) Xóa điểm DRL của 1 học kỳ"""
         selected_item = tree.selection()
         if not selected_item:
             messagebox.showwarning("Chưa chọn", "Vui lòng chọn một học kỳ trong bảng để xóa.", parent=form4_win)
@@ -279,7 +261,7 @@ def open_ChiTietDiemRenLuyen(main_root):
             if conn:
                 conn.close()
                 
-    # ====== Frame nút ======
+    #nút
     frame_btn = tk.Frame(form4_win)
     frame_btn.pack(pady=10)
 
@@ -288,10 +270,9 @@ def open_ChiTietDiemRenLuyen(main_root):
     tk.Button(frame_btn, text="Hủy", width=10, command=clear_input).grid(row=0, column=2, padx=10)
     tk.Button(frame_btn, text="Thoát", width=10, command=form4_win.destroy).grid(row=0, column=3, padx=10)
 
-    # ====== Gán sự kiện ======
+    #click
     cbb_khoa.bind("<<ComboboxSelected>>", on_khoa_select)
     cbb_sinhvien.bind("<<ComboboxSelected>>", on_student_select)
     tree.bind("<<TreeviewSelect>>", on_tree_select)
     
-    # ====== Tải dữ liệu ban đầu======
     load_cbb_khoa()

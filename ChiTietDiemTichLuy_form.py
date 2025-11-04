@@ -2,16 +2,8 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import mysql.connector
 from DatabaseConnection import connect_db
+from DatabaseConnection import center_window
 
-# ====== Hàm canh giữa cửa sổ ======
-def center_window(win, w=750, h=550):
-    ws = win.winfo_screenwidth()
-    hs = win.winfo_screenheight()
-    x = (ws // 2) - (w // 2)
-    y = (hs // 2) - (h // 2)
-    win.geometry(f'{w}x{h}+{x}+{y}')
-
-# ====== HÀM CHÍNH ĐỂ MỞ FORM 3 ======
 def open_ChiTietDiem(main_root):
     
     form3_win = tk.Toplevel(main_root)
@@ -20,15 +12,12 @@ def open_ChiTietDiem(main_root):
     form3_win.resizable(False, False)
     form3_win.grab_set()
 
-    # ====== Tiêu đề ======
     lbl_title = tk.Label(form3_win, text="QUẢN LÝ ĐIỂM CHI TIẾT", font=("Arial", 18, "bold"))
     lbl_title.pack(pady=10)
 
-    # ====== Frame nhập thông tin ======
     frame_info = tk.Frame(form3_win)
     frame_info.pack(pady=5, padx=10, fill="x")
 
-    # ----- Hàng 1: Chọn Khoa và Sinh viên (Lọc) -----
     tk.Label(frame_info, text="Chọn Khoa").grid(row=0, column=0, padx=5, pady=5, sticky="w")
     cbb_khoa = ttk.Combobox(frame_info, width=30)
     cbb_khoa.grid(row=0, column=1, padx=5, pady=5, sticky="w")
@@ -37,7 +26,6 @@ def open_ChiTietDiem(main_root):
     cbb_sinhvien = ttk.Combobox(frame_info, width=30)
     cbb_sinhvien.grid(row=0, column=3, padx=5, pady=5, sticky="w")
     
-    # ----- Hàng 2: Chọn Môn học (Lọc) và Nhập điểm -----
     tk.Label(frame_info, text="Chọn Môn học").grid(row=1, column=0, padx=5, pady=5, sticky="w")
     cbb_monhoc = ttk.Combobox(frame_info, width=30)
     cbb_monhoc.grid(row=1, column=1, padx=5, pady=5, sticky="w")
@@ -46,8 +34,6 @@ def open_ChiTietDiem(main_root):
     entry_diem = tk.Entry(frame_info, width=10)
     entry_diem.grid(row=1, column=3, padx=5, pady=5, sticky="w")
 
-
-    # ====== Bảng danh sách điểm của sinh viên đã chọn ======
     lbl_ds = tk.Label(form3_win, text="Danh sách điểm đã có (chọn sinh viên để xem)", font=("Arial", 10, "bold"))
     lbl_ds.pack(pady=5, anchor="w", padx=10)
 
@@ -65,10 +51,7 @@ def open_ChiTietDiem(main_root):
     tree.column("Diem", width=80, anchor="center")
 
     tree.pack(padx=10, pady=5, fill="both", expand=True)
-    
-    # ===== Hàm xử lý ======
-    
-    # student_data sẽ lưu: { "B20... - Tên": "B20..." }
+    #Hàm xử lý
     student_data = {} 
     monhoc_data = {} 
     
@@ -137,10 +120,9 @@ def open_ChiTietDiem(main_root):
 
     def on_student_select(event):
         selected_display = cbb_sinhvien.get()
-        mssv = student_data.get(selected_display) # Lấy MSSV từ dict
+        mssv = student_data.get(selected_display)
         
         if not mssv:
-            # Xóa bảng
             for i in tree.get_children():
                 tree.delete(i)
             return
@@ -289,7 +271,7 @@ def open_ChiTietDiem(main_root):
                 conn.close()
 
 
-    # ====== Frame nút ======
+    #nút
     frame_btn = tk.Frame(form3_win)
     frame_btn.pack(pady=10)
 
@@ -298,9 +280,9 @@ def open_ChiTietDiem(main_root):
     tk.Button(frame_btn, text="Hủy", width=10, command=clear_input).grid(row=0, column=2, padx=10)
     tk.Button(frame_btn, text="Thoát", width=10, command=form3_win.destroy).grid(row=0, column=3, padx=10)
 
-    # ====== Tải dữ liệu ban đầu ======
-    load_cbb_khoa()
-    
-    # ====== Gán sự kiện ======
+    #click
     cbb_khoa.bind("<<ComboboxSelected>>", on_khoa_select)
     cbb_sinhvien.bind("<<ComboboxSelected>>", on_student_select)
+    
+    load_cbb_khoa()
+    

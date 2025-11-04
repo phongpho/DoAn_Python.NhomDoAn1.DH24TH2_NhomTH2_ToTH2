@@ -3,67 +3,49 @@ from tkinter import ttk, messagebox
 from tkcalendar import DateEntry 
 import mysql.connector 
 from DatabaseConnection import connect_db
+from DatabaseConnection import center_window
 from KetQuaHocTap_form import open_KQHT
 from ChiTietDiemTichLuy_form import open_ChiTietDiem
 from ChiTietDiemRenluyen_form import open_ChiTietDiemRenLuyen
  
-# ====== Hàm canh giữa cửa sổ ====== 
-def center_window(win, w=700, h=500): 
-    ws = win.winfo_screenwidth() 
-    hs = win.winfo_screenheight() 
-    x = (ws // 2) - (w // 2) 
-    y = (hs // 2) - (h // 2) 
-    win.geometry(f'{w}x{h}+{x}+{y}') 
- 
-# ====== Cửa sổ chính ====== 
 root = tk.Tk() 
 root.title("Quản lý sinh viên") 
 center_window(root, 700, 500) 
 root.resizable(False, False) 
 
-# ====== Tiêu đề ====== 
-lbl_title = tk.Label(root, text="QUẢN LÝ SINH VIÊN", font=("Arial", 18, "bold")) 
+lbl_title = tk.Label(root, text="HỆ THỐNG QUẢN LÝ SINH VIÊN ĐẠI HỌC AN GIANG", font=("Arial", 18, "bold")) 
 lbl_title.pack(pady=10) 
 
-# ====== Frame nhập thông tin ====== 
 frame_info = tk.Frame(root) 
 frame_info.pack(pady=5, padx=10, fill="x") 
 
-# ===== Mã số sinh viên =====
 tk.Label(frame_info, text="Mã số sinh viên").grid(row=0, column=0, padx=5, pady=5, sticky="w") 
 entry_mssv = tk.Entry(frame_info, width=20) 
 entry_mssv.grid(row=0, column=1, padx=5, pady=5, sticky="w")
 
-# ===== Họ và tên =====
 tk.Label(frame_info, text="Họ tên sinh viên").grid(row=1, column=0, padx=5, pady=5, sticky="w") 
 entry_hoten = tk.Entry(frame_info, width=25) 
 entry_hoten.grid(row=1, column=1, padx=5, pady=5, sticky="w") 
 
-# ===== Khoa =====
 tk.Label(frame_info, text="Khoa").grid(row=0, column=2, padx=5, pady=5, sticky="w")
 cbb_khoa = ttk.Combobox(frame_info, values=[ "Công Nghệ Thông Tin", "Du Lịch Và Văn Hóa Nghệ Thuật", "Nông Nghiệp - Tài Nguyên Thiên Nhiên", "Sư Phạm",
     "Kinh Tế - Quản Trị Kinh Doanh", "Kỹ Thuật - Công Nghệ - Môi Trường", "Ngoại Ngữ", "Luật - Khoa Học Chính Trị "], width=22)
 cbb_khoa.grid(row=0, column=3, padx=5, pady=5, sticky="w")
 
-# ===== Lớp =====
 tk.Label(frame_info, text="Lớp").grid(row=1, column=2, padx=5, pady=5, sticky="w")
 entry_lop = tk.Entry(frame_info, width=20)
 entry_lop.grid(row=1, column=3, padx=5, pady=5, sticky="w")
  
-# ===== Giới tính =====
 tk.Label(frame_info, text="Giới tính").grid(row=2, column=0, padx=5, pady=5, sticky="w") 
 gender_var = tk.StringVar(value="Nam") 
 tk.Radiobutton(frame_info, text="Nam", variable=gender_var, value="Nam").grid(row=2, column=1, padx=5, sticky="w") 
 tk.Radiobutton(frame_info, text="Nữ", variable=gender_var, value="Nữ").grid(row=2, column=1, padx=60, sticky="w") 
 
-# ===== Ngày sinh =====
 tk.Label(frame_info, text="Ngày sinh").grid(row=2, column=2, padx=5, pady=5, sticky="w") 
 entry_date = DateEntry(frame_info, width=12, background="darkblue", 
 foreground="white", date_pattern="yyyy-mm-dd") 
 entry_date.grid(row=2, column=3, padx=5, pady=5, sticky="w")
 
-
-#====== Bảng danh sách nhân viên ====== 
 lbl_ds = tk.Label(root, text="Danh sách sinh viên", font=("Arial", 10, "bold")) 
 lbl_ds.pack(pady=5, anchor="w", padx=10) 
  
@@ -81,8 +63,7 @@ tree.column("khoa", width=120, anchor="center")
 tree.column("Lớp", width=80, anchor="center") 
  
 tree.pack(padx=10, pady=5, fill="both") 
-
-# ====== Chức năng CRUD ====== 
+ 
 def clear_input(): 
     entry_mssv.delete(0, tk.END) 
     entry_hoten.delete(0, tk.END) 
@@ -133,8 +114,6 @@ def xoa_sv():
     if not selected: 
         messagebox.showwarning("Chưa chọn", "Hãy chọn sinh viên để xóa", parent=root) 
         return 
-        
-    # Thêm bước xác nhận cho an toàn
     if not messagebox.askyesno("Xác nhận xóa", 
                              "Bạn có chắc muốn xóa sinh viên này?\n(TOÀN BỘ điểm tích lũy và điểm rèn luyện của sinh viên này cũng sẽ bị xóa vĩnh viễn)", 
                              parent=root):
@@ -142,7 +121,7 @@ def xoa_sv():
         
     mssv = tree.item(selected)["values"][0] 
     
-    conn = None # Khởi tạo conn
+    conn = None
     try:
         conn = connect_db() 
         cur = conn.cursor() 
@@ -207,7 +186,7 @@ def luu_sv():
     clear_input()
 
 
-# ====== Frame nút ====== 
+#nút
 frame_btn = tk.Frame(root) 
 frame_btn.pack(pady=5) 
  
@@ -218,13 +197,13 @@ tk.Button(frame_btn, text="Hủy", width=8, command=clear_input).grid(row=0, col
 tk.Button(frame_btn, text="Xóa", width=8, command=xoa_sv).grid(row=0, column=4, padx=5) 
 tk.Button(frame_btn, text="Thoát", width=8, command=root.quit).grid(row=0, column=5, padx=5) 
 
-# ====== Nút mở form KQHT và Chi Tiết Điểm ======
+#nút mở rộng
 tk.Button(frame_btn, text="Kết quả học tập", width=20, 
           command=lambda: open_KQHT(root)).grid(row=1, column=0, columnspan=2, pady=5)
 tk.Button(frame_btn, text="Chỉnh Sửa Điểm Tích Lũy", width=20, 
           command=lambda: open_ChiTietDiem(root)).grid(row=1, column=2, columnspan=2, pady=5)
 tk.Button(frame_btn, text="Chỉnh Sửa Điểm Rèn Luyện", width=20, 
           command=lambda: open_ChiTietDiemRenLuyen(root)).grid(row=1, column=4, columnspan=2, pady=5)
- 
+
 load_data() 
 root.mainloop()

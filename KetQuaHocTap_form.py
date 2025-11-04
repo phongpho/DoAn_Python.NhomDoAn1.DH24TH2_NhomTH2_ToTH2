@@ -2,16 +2,8 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import mysql.connector
 from DatabaseConnection import connect_db
+from DatabaseConnection import center_window
 
-# ====== Hàm canh giữa cửa sổ ======
-def center_window(win, w=700, h=500):
-    ws = win.winfo_screenwidth()
-    hs = win.winfo_screenheight()
-    x = (ws // 2) - (w // 2)
-    y = (hs // 2) - (h // 2)
-    win.geometry(f'{w}x{h}+{x}+{y}')
-
-# ====== Cửa sổ Kết quả Học tập (FORM 2) ======
 def open_KQHT(main_root):
     form2_win = tk.Toplevel(main_root)
     form2_win.title("Tra cứu Kết quả Học tập")
@@ -19,15 +11,12 @@ def open_KQHT(main_root):
     form2_win.resizable(False, False)
     form2_win.grab_set()
 
-    # ====== Tiêu đề ======
     lbl_title = tk.Label(form2_win, text="TRA CỨU KẾT QUẢ HỌC TẬP", font=("Arial", 18, "bold"))
     lbl_title.pack(pady=10)
 
-    # ====== Frame Lọc ======
     frame_info = tk.Frame(form2_win)
     frame_info.pack(pady=5, padx=10, fill="x")
 
-    # --- Sửa lỗi 1: Tách .grid() ra ---
     tk.Label(frame_info, text="Chọn khoa").grid(row=0, column=0, padx=5, pady=5, sticky="w")
     cbb_khoa = ttk.Combobox(frame_info, width=30)
     cbb_khoa.grid(row=0, column=1, padx=5, pady=5, sticky="w") 
@@ -36,7 +25,6 @@ def open_KQHT(main_root):
     cbb_sinhvien = ttk.Combobox(frame_info, width=30)
     cbb_sinhvien.grid(row=0, column=3, padx=5, pady=5, sticky="w") 
 
-    # ====== Bảng danh sách kết quả (Treeview) ======
     lbl_ds = tk.Label(form2_win, text="Bảng điểm tổng hợp", font=("Arial", 10, "bold"))
     lbl_ds.pack(pady=5, anchor="w", padx=10)
 
@@ -59,7 +47,7 @@ def open_KQHT(main_root):
     
     tree.pack(padx=10, pady=5, fill="both", expand=True)
 
-    # ===== Hàm chức năng =====
+    #Hàm xử lý
     sinhvien_data = {} 
     
     def load_tree_data(khoa_filter=None, mssv_filter=None, load_all=False): 
@@ -163,7 +151,7 @@ def open_KQHT(main_root):
     cbb_khoa.bind("<<ComboboxSelected>>", khoa_select)
     cbb_sinhvien.bind("<<ComboboxSelected>>", sinhvien_select)
 
-    # ====== Frame nút ======
+    #Nút
     frame_btn = tk.Frame(form2_win)
     frame_btn.pack(pady=10)
 
