@@ -2,46 +2,69 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import mysql.connector
 from DatabaseConnection import connect_db
+from DatabaseConnection import center_window
 
-# ====== Hàm canh giữa cửa sổ ======
-def center_window(win, w=700, h=500):
-    ws = win.winfo_screenwidth()
-    hs = win.winfo_screenheight()
-    x = (ws // 2) - (w // 2)
-    y = (hs // 2) - (h // 2)
-    win.geometry(f'{w}x{h}+{x}+{y}')
-
-# ====== Cửa sổ Kết quả Học tập (FORM 2) ======
 def open_KQHT(main_root):
     form2_win = tk.Toplevel(main_root)
     form2_win.title("Tra cứu Kết quả Học tập")
-    center_window(form2_win, 700, 500)
+    center_window(form2_win, 1200, 700) 
     form2_win.resizable(False, False)
     form2_win.grab_set()
+    form2_win.config(bg="white")
 
-    # ====== Tiêu đề ======
-    lbl_title = tk.Label(form2_win, text="TRA CỨU KẾT QUẢ HỌC TẬP", font=("Arial", 18, "bold"))
-    lbl_title.pack(pady=10)
+    frame_sidebar = tk.Frame(form2_win, relief=tk.RIDGE, bd=2, padx=10, pady=10, bg="#EAF2F8")
+    frame_sidebar.pack(side=tk.LEFT, fill=tk.Y, padx=10, pady=10)
 
-    # ====== Frame Lọc ======
-    frame_info = tk.Frame(form2_win)
-    frame_info.pack(pady=5, padx=10, fill="x")
+    lbl_sidebar_title = tk.Label(frame_sidebar, text="BỘ LỌC TRA CỨU", 
+                                 font=("Arial", 16, "bold"), 
+                                 bg="#2874A6", fg="white")
+    lbl_sidebar_title.pack(pady=(5, 15), fill=tk.X)
 
-    # --- Sửa lỗi 1: Tách .grid() ra ---
-    tk.Label(frame_info, text="Chọn khoa").grid(row=0, column=0, padx=5, pady=5, sticky="w")
+    frame_info = tk.Frame(frame_sidebar, bg="#EAF2F8")
+    frame_info.pack(pady=5, padx=10)
+
+    tk.Label(frame_info, text="Chọn khoa", bg="#EAF2F8", fg="#333333").grid(row=0, column=0, padx=5, pady=10, sticky="w")
     cbb_khoa = ttk.Combobox(frame_info, width=30)
-    cbb_khoa.grid(row=0, column=1, padx=5, pady=5, sticky="w") 
+    cbb_khoa.grid(row=0, column=1, padx=5, pady=10, sticky="w") 
 
-    tk.Label(frame_info, text="Chọn sinh viên (theo khoa)").grid(row=0, column=2, padx=5, pady=5, sticky="w")
+    tk.Label(frame_info, text="Chọn sinh viên", bg="#EAF2F8", fg="#333333").grid(row=1, column=0, padx=5, pady=10, sticky="w")
     cbb_sinhvien = ttk.Combobox(frame_info, width=30)
-    cbb_sinhvien.grid(row=0, column=3, padx=5, pady=5, sticky="w") 
+    cbb_sinhvien.grid(row=1, column=1, padx=5, pady=10, sticky="w") 
 
-    # ====== Bảng danh sách kết quả (Treeview) ======
-    lbl_ds = tk.Label(form2_win, text="Bảng điểm tổng hợp", font=("Arial", 10, "bold"))
-    lbl_ds.pack(pady=5, anchor="w", padx=10)
+    frame_btn = tk.Frame(frame_sidebar, bg="#EAF2F8")
+    frame_btn.pack(pady=20, fill=tk.X)
 
-    columns = ("Mssv", "Họ và tên", "Khoa", "Lớp", "DRL", "DTL")
-    tree = ttk.Treeview(form2_win, columns=columns, show="headings", height=10)
+    tk.Button(frame_btn, text="Tải Tất Cả", command=lambda: tai_tat_ca(), 
+              bg="#2874A6", fg="white", relief=tk.FLAT, font=("Arial", 9, "bold"), height=2).pack(fill=tk.X, pady=4)
+    tk.Button(frame_btn, text="Xóa Bảng", command=lambda: reset_view(), 
+              bg="#2874A6", fg="white", relief=tk.FLAT, font=("Arial", 9, "bold"), height=2).pack(fill=tk.X, pady=4)
+    tk.Button(frame_btn, text="Thoát", command=form2_win.destroy, 
+              bg="#DC3545", fg="white", relief=tk.FLAT, font=("Arial", 9, "bold"), height=2).pack(fill=tk.X, pady=4)
+
+    frame_main = tk.Frame(form2_win, padx=10, pady=10, bg="white") 
+    frame_main.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+
+    lbl_title = tk.Label(frame_main, text="BẢNG ĐIỂM TỔNG HỢP", 
+                         font=("Arial", 18, "bold"), bg="white", fg="#2874A6")
+    lbl_title.pack(pady=(5, 15))
+
+    style = ttk.Style(form2_win)
+    style.theme_use("default") 
+    style.configure("Treeview", 
+                    background="white", 
+                    fieldbackground="white", 
+                    foreground="black",
+                    rowheight=25,
+                    bd=1, relief=tk.SOLID)
+    style.map("Treeview", background=[('selected', '#AED6F1')]) 
+    style.configure("Treeview.Heading", 
+                    font=("Arial", 10, "bold"), 
+                    background="#EAF2F8", 
+                    foreground="black",
+                    relief=tk.FLAT)
+
+    columns = ("Mssv", "Họ và tên", "Khoa", "Lớp", "DRL", "DTL", "XepLoai")
+    tree = ttk.Treeview(frame_main, columns=columns, show="headings", height=10)
     
     tree.heading("Mssv", text="MSSV")
     tree.heading("Họ và tên", text="Họ và tên")
@@ -49,6 +72,7 @@ def open_KQHT(main_root):
     tree.heading("Lớp", text="Lớp")
     tree.heading("DRL", text="Điểm Rèn Luyện")
     tree.heading("DTL", text="Điểm Tích Lũy")
+    tree.heading("XepLoai", text="Xếp Loại")
 
     tree.column("Mssv", width=80, anchor="center")
     tree.column("Họ và tên", width=150)
@@ -56,14 +80,13 @@ def open_KQHT(main_root):
     tree.column("Lớp", width=80, anchor="center")
     tree.column("DRL", width=100, anchor="center")
     tree.column("DTL", width=100, anchor="center")
+    tree.column("XepLoai", width=100, anchor="center")
     
     tree.pack(padx=10, pady=5, fill="both", expand=True)
 
-    # ===== Hàm chức năng =====
     sinhvien_data = {} 
     
     def load_tree_data(khoa_filter=None, mssv_filter=None, load_all=False): 
-        """Tải dữ liệu lên Treeview, lọc theo khoa, mssv HOẶC tải tất cả"""
         for i in tree.get_children():
             tree.delete(i)
         
@@ -86,7 +109,14 @@ def open_KQHT(main_root):
             
             cur.execute(sql, params)
             for row in cur.fetchall():
-                tree.insert("", tk.END, values=row)
+                drl = row[4]
+                dtl = row[5]
+
+                loai = xep_loai_hoc_tap(dtl, drl)
+
+                values_with_xeploai = row + (loai,)
+
+                tree.insert("", tk.END, values=values_with_xeploai)
             conn.close()
         except Exception as e:
             messagebox.showerror("Lỗi CSDL", f"Không thể tải bảng điểm: {e}", parent=form2_win)
@@ -159,17 +189,42 @@ def open_KQHT(main_root):
         
         load_tree_data(load_all=True)
 
+    def xep_loai_hoc_tap(dtl, drl):
 
+        if drl < 50:
+            return "Yếu (DRL < 50)"
+
+        if dtl >= 9.0:
+            dtl_he_4 = 4.0
+        elif dtl >= 8.5:
+            dtl_he_4 = 3.7
+        elif dtl >= 8.0:
+            dtl_he_4 = 3.5
+        elif dtl >= 7.0:
+            dtl_he_4 = 3.0
+        elif dtl >= 6.5:
+            dtl_he_4 = 2.5
+        elif dtl >= 5.5:
+            dtl_he_4 = 2.0
+        elif dtl >= 5.0:
+            dtl_he_4 = 1.5
+        elif dtl >= 4.0:
+            dtl_he_4 = 1.0
+        else:
+            dtl_he_4 = 0.0
+
+        if dtl_he_4 >= 3.6:
+            return "Xuất sắc"
+        elif dtl_he_4 >= 3.2:
+            return "Giỏi"
+        elif dtl_he_4 >= 2.5:
+            return "Khá"
+        elif dtl_he_4 >= 2.0:
+            return "Trung bình"
+        else:
+            return "Yếu"
+            
     cbb_khoa.bind("<<ComboboxSelected>>", khoa_select)
     cbb_sinhvien.bind("<<ComboboxSelected>>", sinhvien_select)
 
-    # ====== Frame nút ======
-    frame_btn = tk.Frame(form2_win)
-    frame_btn.pack(pady=10)
-
-    tk.Button(frame_btn, text="Tải Tất Cả", width=10, command=tai_tat_ca).grid(row=0, column=0, padx=10)
-    tk.Button(frame_btn, text="Xóa Bảng", width=10, command=reset_view).grid(row=0, column=1, padx=10)
-    tk.Button(frame_btn, text="Thoát", width=10, command=form2_win.destroy).grid(row=0, column=2, padx=10)
-
-    # ====== Tải dữ liệu ban đầu ======
     load_cbb_khoa()
