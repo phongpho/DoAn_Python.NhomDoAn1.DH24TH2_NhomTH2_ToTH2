@@ -92,17 +92,17 @@ def open_main_window():
                     foreground="black",
                     relief=tk.FLAT)
 
-    columns = ("Mssv", "Họ và tên", "Giới tính", "Ngày sinh", "khoa", "Lớp") 
+    columns = ("Mssv", "Họ và tên", "Ngày sinh", "Giới tính", "khoa", "Lớp") 
     tree = ttk.Treeview(frame_main, columns=columns, show="headings", height=10) 
 
     for col in columns: 
         tree.heading(col, text=col.capitalize()) 
 
     tree.column("Mssv", width=60, anchor="center") 
-    tree.column("Họ và tên", width=120)
-    tree.column("Giới tính", width=50, anchor="center") 
+    tree.column("Họ và tên", width=100)
     tree.column("Ngày sinh", width=80, anchor="center") 
-    tree.column("khoa", width=120)
+    tree.column("Giới tính", width=50, anchor="center") 
+    tree.column("khoa", width=140)
     tree.column("Lớp", width=80, anchor="center") 
 
     tree.pack(padx=10, pady=5, fill=tk.BOTH, expand=True)
@@ -133,7 +133,7 @@ def open_main_window():
             tree.delete(i)
         conn = connect_db()
         cur = conn.cursor()
-        cur.execute("SELECT mssv, hoten, gioitinh, ngaysinh, khoa, lop FROM sinhvien")
+        cur.execute("SELECT mssv, hoten, ngaysinh, gioitinh, khoa, lop FROM sinhvien")
         for row in cur.fetchall():
             tree.insert("", tk.END, values=row)
         conn.close()
