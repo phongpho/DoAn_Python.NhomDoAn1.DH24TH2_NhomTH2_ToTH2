@@ -200,11 +200,16 @@ def open_main_window():
             messagebox.showwarning("Chưa chọn", "Hãy chọn sinh viên để sửa", parent=root) 
             return 
         values = tree.item(selected)["values"]
-        clear_input() 
+
+        entry_mssv.delete(0, tk.END) 
+        entry_hoten.delete(0, tk.END) 
+        entry_lop.delete(0, tk.END)
+
+
         entry_mssv.insert(0, values[0]) 
         entry_hoten.insert(0, values[1]) 
-        gender_var.set(values[2]) 
-        entry_date.set_date(values[3]) 
+        entry_date.set_date(values[2])
+        gender_var.set(values[3])
         cbb_khoa.set(values[4])
         entry_lop.insert(0, values[5])
 
