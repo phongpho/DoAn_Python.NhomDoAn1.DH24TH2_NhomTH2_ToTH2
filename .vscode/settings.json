@@ -1,0 +1,6 @@
+{
+    "files.exclude": {
+        "background.jpg": true,
+        "logo_agu.jpg": true
+    }
+}
