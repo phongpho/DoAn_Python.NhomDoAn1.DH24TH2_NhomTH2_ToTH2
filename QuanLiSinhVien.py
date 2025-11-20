@@ -14,7 +14,7 @@ def open_main_window():
     center_window(root, 1000, 600) 
     root.resizable(False, False)
     root.config(bg="white") 
-
+#frame sidebar
     frame_sidebar = tk.Frame(root, relief=tk.RIDGE, bd=2, padx=10, pady=10, bg="#EAF2F8")
     frame_sidebar.pack(side=tk.LEFT, fill=tk.Y, padx=10, pady=10)
 
@@ -22,7 +22,7 @@ def open_main_window():
                                 font=("Arial", 16, "bold"), 
                                 bg="#2874A6", fg="white")
     lbl_sidebar_title.pack(pady=(5, 15), fill=tk.X)
-
+    #frame info 
     frame_info = tk.Frame(frame_sidebar, bg="#EAF2F8") 
     frame_info.pack(pady=5, padx=10)
 
@@ -58,7 +58,7 @@ def open_main_window():
                         date_pattern="yyyy-mm-dd", headersbackground="#2874A6",
                         selectbackground="#2874A6") 
     entry_date.grid(row=5, column=1, padx=5, pady=5, sticky="w")
-
+    #frame button CRUD
     frame_btn_crud = tk.Frame(frame_sidebar, bg="#EAF2F8")
     frame_btn_crud.pack(pady=10, fill=tk.X)
     tk.Button(frame_btn_crud, text="Tải Dữ Liệu", command=lambda: load_data(), height=2, bg="#32AC10", fg="white", font=("Arial", 9, "bold"), relief=tk.FLAT).pack(fill=tk.X, pady=3)
@@ -67,7 +67,7 @@ def open_main_window():
     tk.Button(frame_btn_crud, text="Sửa", command=lambda: sua_sv(), height=2, bg="#007BFF", fg="white", font=("Arial", 9, "bold"), relief=tk.FLAT).pack(fill=tk.X, pady=3)
     tk.Button(frame_btn_crud, text="Hủy", command=lambda: clear_input(), height=2, bg="#007BFF", fg="white", font=("Arial", 9, "bold"), relief=tk.FLAT).pack(fill=tk.X, pady=3)
     tk.Button(frame_btn_crud, text="Xóa", command=lambda: xoa_sv(), height=2, bg="#DC3545", fg="white", font=("Arial", 9, "bold"), relief=tk.FLAT).pack(fill=tk.X, pady=3)
-
+#frame main
     frame_main = tk.Frame(root, padx=10, pady=10, bg="white") 
     frame_main.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
@@ -106,7 +106,7 @@ def open_main_window():
     tree.column("Lớp", width=80, anchor="center") 
 
     tree.pack(padx=10, pady=5, fill=tk.BOTH, expand=True)
-
+    #frame button mở rộng
     frame_Button_Morong = tk.Frame(frame_main, bg="white") 
     frame_Button_Morong.pack(pady=10)
 
