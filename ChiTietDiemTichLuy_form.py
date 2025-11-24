@@ -42,7 +42,8 @@ def open_ChiTietDiemTichLuy(main_root):
 
     frame_btn = tk.Frame(frame_sidebar, bg="#EAF2F8")
     frame_btn.pack(pady=20, fill=tk.X)
-
+    tk.Button(frame_btn, text="Load Dữ Liệu", command=lambda: load_data(), 
+              bg="#007BFF", fg="white", relief=tk.FLAT, font=("Arial", 9, "bold"), height=2).pack(fill=tk.X, pady=4)
     tk.Button(frame_btn, text="Lưu Điểm", command=lambda: luu_diem(), 
               bg="#28A745", fg="white", relief=tk.FLAT, font=("Arial", 9, "bold"), height=2).pack(fill=tk.X, pady=4)
     tk.Button(frame_btn, text="Xóa Điểm", command=lambda: xoa_diem(), 
@@ -78,14 +79,17 @@ def open_ChiTietDiemTichLuy(main_root):
                     foreground="black",
                     relief=tk.FLAT)
 
-    columns = ("MaMH", "TenMH", "SoTC", "Diem")
+    columns = ("MSSV", "MaMH", "TenMH", "SoTC", "Diem")
     tree = ttk.Treeview(frame_main, columns=columns, show="headings", height=10)
 
+
+    tree.heading("MSSV", text="MSSV")   
     tree.heading("MaMH", text="Mã Môn Học")
     tree.heading("TenMH", text="Tên Môn Học")
     tree.heading("SoTC", text="Số Tín Chỉ")
     tree.heading("Diem", text="Điểm (Hệ 10)")
 
+    tree.column("MSSV", width=80, anchor="center") 
     tree.column("MaMH", width=80, anchor="center")
     tree.column("TenMH", width=250)
     tree.column("SoTC", width=80, anchor="center")
@@ -96,6 +100,22 @@ def open_ChiTietDiemTichLuy(main_root):
     student_data = {} 
     monhoc_data = {} 
     
+    def load_data():
+        try:
+            for i in tree.get_children():
+                tree.delete(i)
+            conn = connect_db()
+            cur = conn.cursor() 
+            cur.execute("SELECT tl.mssv, mh.mamh, mh.tenmh, mh.sotc, tl.diem_mon "
+            "FROM diem_tichluy tl "
+            "JOIN monhoc mh ON tl.mamh = mh.mamh"
+            " ORDER BY tl.mssv")
+            for row in cur.fetchall():
+                tree.insert("", tk.END, values=row)
+            conn.close()
+            
+        except Exception as e:
+            messagebox.showerror("Lỗi CSDL", f"Không thể tải dữ liệu: {e}", parent=form3_win)
     def load_cbb_khoa():
         try:
             conn = connect_db()
@@ -177,18 +197,19 @@ def open_ChiTietDiemTichLuy(main_root):
         try:
             conn = connect_db()
             cur = conn.cursor()
+
             sql = """SELECT mh.mamh, mh.tenmh, mh.sotc, tl.diem_mon
                      FROM diem_tichluy tl
                      JOIN monhoc mh ON tl.mamh = mh.mamh
                      WHERE tl.mssv = %s"""
             cur.execute(sql, (mssv,))
             
-            for row in cur.fetchall():
-                tree.insert("", tk.END, values=row)
+            for row in cur.fetchall():            
+                full_row = (mssv,) + row 
+                tree.insert("", tk.END, values=full_row)
             conn.close()
         except Exception as e:
             messagebox.showerror("Lỗi CSDL", f"Không thể tải bảng điểm: {e}", parent=form3_win)
-
     def clear_input():
         cbb_khoa.set("")
         cbb_sinhvien.set("")
@@ -279,15 +300,12 @@ def open_ChiTietDiemTichLuy(main_root):
             return
             
         values = tree.item(selected_item)["values"]
-        mamh = values[0]
-        tenmh = values[1]
-        
-        mssv = student_data.get(cbb_sinhvien.get()) 
-        if not mssv:
-            messagebox.showwarning("Lỗi", "Không tìm thấy sinh viên đang chọn.", parent=form3_win)
-            return 
 
-        if not messagebox.askyesno("Xác nhận xóa", f"Bạn có chắc muốn xóa điểm môn '{tenmh}' của sinh viên này không?", parent=form3_win):
+        mamh = values[1]   
+        tenmh = values[2]  
+        mssv = values[0] 
+
+        if not messagebox.askyesno("Xác nhận xóa", f"Bạn có chắc muốn xóa điểm môn '{tenmh}' của sinh viên {mssv} không?", parent=form3_win):
             return
 
         conn = None

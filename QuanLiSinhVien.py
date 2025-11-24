@@ -9,33 +9,32 @@ from ChiTietDiemTichLuy_form import open_ChiTietDiemTichLuy
 from ChiTietDiemRenluyen_form import open_ChiTietDiemRenLuyen
 def open_main_window():
 
-    root = tk.Tk() 
-    root.title("Hệ Thống Quản Lý Sinh Viên") 
-    center_window(root, 1000, 600) 
+    root = tk.Tk()
+    root.title("Hệ Thống Quản Lý Sinh Viên")
+    center_window(root, 1000, 640)
     root.resizable(False, False)
-    root.config(bg="white") 
+    root.config(bg="white")
 #frame sidebar
     frame_sidebar = tk.Frame(root, relief=tk.RIDGE, bd=2, padx=10, pady=10, bg="#EAF2F8")
     frame_sidebar.pack(side=tk.LEFT, fill=tk.Y, padx=10, pady=10)
-
-    lbl_sidebar_title = tk.Label(frame_sidebar, text="THÔNG TIN SINH VIÊN", 
-                                font=("Arial", 16, "bold"), 
+    lbl_sidebar_title = tk.Label(frame_sidebar, text="THÔNG TIN SINH VIÊN",
+                                font=("Arial", 16, "bold"),
                                 bg="#2874A6", fg="white")
     lbl_sidebar_title.pack(pady=(5, 15), fill=tk.X)
-    #frame info 
-    frame_info = tk.Frame(frame_sidebar, bg="#EAF2F8") 
+    #frame info
+    frame_info = tk.Frame(frame_sidebar, bg="#EAF2F8")
     frame_info.pack(pady=5, padx=10)
 
-    tk.Label(frame_info, text="Mã số sinh viên", bg="#EAF2F8", fg="#333333").grid(row=0, column=0, padx=5, pady=5, sticky="w") 
+    tk.Label(frame_info, text="Mã số sinh viên", bg="#EAF2F8", fg="#333333").grid(row=0, column=0, padx=5, pady=5, sticky="w")
     entry_mssv = tk.Entry(frame_info, width=30, bg="white", fg="#333333")
     entry_mssv.grid(row=0, column=1, padx=5, pady=5, sticky="w")
 
-    tk.Label(frame_info, text="Họ tên sinh viên", bg="#EAF2F8", fg="#333333").grid(row=1, column=0, padx=5, pady=5, sticky="w") 
-    entry_hoten = tk.Entry(frame_info, width=30, bg="white", fg="#333333") 
-    entry_hoten.grid(row=1, column=1, padx=5, pady=5, sticky="w") 
+    tk.Label(frame_info, text="Họ tên sinh viên", bg="#EAF2F8", fg="#333333").grid(row=1, column=0, padx=5, pady=5, sticky="w")
+    entry_hoten = tk.Entry(frame_info, width=30, bg="white", fg="#333333")
+    entry_hoten.grid(row=1, column=1, padx=5, pady=5, sticky="w")
 
     tk.Label(frame_info, text="Khoa", bg="#EAF2F8", fg="#333333").grid(row=2, column=0, padx=5, pady=5, sticky="w")
-    cbb_khoa = ttk.Combobox(frame_info, values=[ "Công Nghệ Thông Tin", "Du Lịch Và Văn Hóa Nghệ Thuật", 
+    cbb_khoa = ttk.Combobox(frame_info, values=[ "Công Nghệ Thông Tin", "Du Lịch Và Văn Hóa Nghệ Thuật",
                                                 "Nông Nghiệp - Tài Nguyên Thiên Nhiên", "Sư Phạm",
                                                 "Kinh Tế - Quản Trị Kinh Doanh", "Kỹ Thuật - Công Nghệ - Môi Trường",
                                                 "Ngoại Ngữ", "Luật - Khoa Học Chính Trị "], width=28)
@@ -45,19 +44,21 @@ def open_main_window():
     entry_lop = tk.Entry(frame_info, width=30, bg="white", fg="#333333")
     entry_lop.grid(row=3, column=1, padx=5, pady=5, sticky="w")
 
-    tk.Label(frame_info, text="Giới tính", bg="#EAF2F8", fg="#333333").grid(row=4, column=0, padx=5, pady=5, sticky="w") 
-    gender_var = tk.StringVar(value="Nam") 
+    tk.Label(frame_info, text="Giới tính", bg="#EAF2F8", fg="#333333").grid(row=4, column=0, padx=5, pady=5, sticky="w")
+    gender_var = tk.StringVar(value="Nam")
 
     frame_gender = tk.Frame(frame_info, bg="#EAF2F8")
     frame_gender.grid(row=4, column=1, sticky="w")
-    tk.Radiobutton(frame_gender, text="Nam", variable=gender_var, value="Nam", bg="#EAF2F8", fg="#333333", activebackground="#EAF2F8").pack(side=tk.LEFT, padx=5) 
-    tk.Radiobutton(frame_gender, text="Nữ", variable=gender_var, value="Nữ", bg="#EAF2F8", fg="#333333", activebackground="#EAF2F8").pack(side=tk.LEFT, padx=10) 
 
-    tk.Label(frame_info, text="Ngày sinh", bg="#EAF2F8", fg="#333333").grid(row=5, column=0, padx=5, pady=5, sticky="w") 
-    entry_date = DateEntry(frame_info, width=12, background="#2874A6", foreground="white", 
+    tk.Radiobutton(frame_gender, text="Nam", variable=gender_var, value="Nam", bg="#EAF2F8", fg="#333333", activebackground="#EAF2F8").pack(side=tk.LEFT, padx=5)
+    tk.Radiobutton(frame_gender, text="Nữ", variable=gender_var, value="Nữ", bg="#EAF2F8", fg="#333333", activebackground="#EAF2F8").pack(side=tk.LEFT, padx=10)
+
+    tk.Label(frame_info, text="Ngày sinh", bg="#EAF2F8", fg="#333333").grid(row=5, column=0, padx=5, pady=5, sticky="w")
+    entry_date = DateEntry(frame_info, width=12, background="#2874A6", foreground="white",
                         date_pattern="yyyy-mm-dd", headersbackground="#2874A6",
-                        selectbackground="#2874A6") 
+                        selectbackground="#2874A6")
     entry_date.grid(row=5, column=1, padx=5, pady=5, sticky="w")
+   
     #frame button CRUD
     frame_btn_crud = tk.Frame(frame_sidebar, bg="#EAF2F8")
     frame_btn_crud.pack(pady=10, fill=tk.X)
@@ -67,6 +68,7 @@ def open_main_window():
     tk.Button(frame_btn_crud, text="Sửa", command=lambda: sua_sv(), height=2, bg="#007BFF", fg="white", font=("Arial", 9, "bold"), relief=tk.FLAT).pack(fill=tk.X, pady=3)
     tk.Button(frame_btn_crud, text="Hủy", command=lambda: clear_input(), height=2, bg="#007BFF", fg="white", font=("Arial", 9, "bold"), relief=tk.FLAT).pack(fill=tk.X, pady=3)
     tk.Button(frame_btn_crud, text="Xóa", command=lambda: xoa_sv(), height=2, bg="#DC3545", fg="white", font=("Arial", 9, "bold"), relief=tk.FLAT).pack(fill=tk.X, pady=3)
+    tk.Button(frame_btn_crud, text="Tìm Kiếm", command=lambda: timkiem(), height=2, bg="#FFC107", fg="white", font=("Arial", 9, "bold"), relief=tk.FLAT).pack(fill=tk.X, pady=3)
 #frame main
     frame_main = tk.Frame(root, padx=10, pady=10, bg="white") 
     frame_main.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
@@ -245,7 +247,22 @@ def open_main_window():
         if not selected:
             return
         sua_sv()
-
+    def timkiem():
+        mssv = entry_mssv.get()
+        if mssv == "":
+            messagebox.showwarning("Thiếu dữ liệu", "Vui lòng nhập Mã số sinh viên để tìm kiếm", parent=root)
+            return
+        for i in tree.get_children():
+            tree.delete(i)
+        conn = connect_db()
+        cur = conn.cursor()
+        cur.execute("SELECT mssv, hoten, ngaysinh, gioitinh, khoa, lop FROM sinhvien WHERE mssv = %s", (mssv,))
+        results = cur.fetchall()
+        if not results:
+            messagebox.showinfo("Không tìm thấy", "Không tìm thấy sinh viên với Mã số đã nhập", parent=root)
+        for row in results:
+            tree.insert("", tk.END, values=row)
+        conn.close()
     tree.bind("<<TreeviewSelect>>", on_tree_select)
     # load_data() 
     root.mainloop()

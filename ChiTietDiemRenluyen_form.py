@@ -55,6 +55,8 @@ def open_ChiTietDiemRenLuyen(main_root):
     frame_btn = tk.Frame(frame_sidebar, bg="#EAF2F8")
     frame_btn.pack(pady=20, fill=tk.X)
     
+    tk.Button(frame_btn, text="Load Dữ Liệu", command=lambda: load_data(), 
+              bg="#007BFF", fg="white", relief=tk.FLAT, font=("Arial", 9, "bold"), height=2).pack(fill=tk.X, pady=4)
     tk.Button(frame_btn, text="Lưu Điểm", command=lambda: luu_drl(),
               bg="#28A745", fg="white", relief=tk.FLAT, font=("Arial", 9, "bold"), height=2).pack(fill=tk.X, pady=4)
     tk.Button(frame_btn, text="Xóa Điểm", command=lambda: xoa_drl(),
@@ -107,6 +109,23 @@ def open_ChiTietDiemRenLuyen(main_root):
     
     student_data = {} 
     
+    def load_data():
+        try:
+            for i in tree.get_children():
+                tree.delete(i)
+            conn = connect_db()
+            cur = conn.cursor() 
+            cur.execute("SELECT drl.mssv, sv.hoten, drl.hocky, drl.diem "
+                        "FROM diem_renluyen drl "
+                        "JOIN sinhvien sv ON drl.mssv = sv.mssv "
+                        "ORDER BY drl.mssv, drl.hocky")
+            for row in cur.fetchall():
+                tree.insert("", tk.END, values=row)
+            conn.close()
+            
+        except Exception as e:
+            messagebox.showerror("Lỗi CSDL", f"Không thể tải dữ liệu: {e}", parent=form4_win)
+
     def load_cbb_khoa():
         try:
             conn = connect_db()
