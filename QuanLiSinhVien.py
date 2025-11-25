@@ -11,7 +11,7 @@ def open_main_window():
 
     root = tk.Tk()
     root.title("Hệ Thống Quản Lý Sinh Viên")
-    center_window(root, 1000, 640)
+    center_window(root, 1000, 600)
     root.resizable(False, False)
     root.config(bg="white")
 #frame sidebar
@@ -64,8 +64,7 @@ def open_main_window():
     frame_btn_crud.pack(pady=10, fill=tk.X)
     tk.Button(frame_btn_crud, text="Tải Dữ Liệu", command=lambda: load_data(), height=2, bg="#32AC10", fg="white", font=("Arial", 9, "bold"), relief=tk.FLAT).pack(fill=tk.X, pady=3)
     tk.Button(frame_btn_crud, text="Thêm", command=lambda: them_sv(), height=2, bg="#007BFF", fg="white", font=("Arial", 9, "bold"), relief=tk.FLAT).pack(fill=tk.X, pady=3)
-    tk.Button(frame_btn_crud, text="Lưu", command=lambda: luu_sv(), height=2, bg="#007BFF", fg="white", font=("Arial", 9, "bold"), relief=tk.FLAT).pack(fill=tk.X, pady=3)
-    tk.Button(frame_btn_crud, text="Sửa", command=lambda: sua_sv(), height=2, bg="#007BFF", fg="white", font=("Arial", 9, "bold"), relief=tk.FLAT).pack(fill=tk.X, pady=3)
+    tk.Button(frame_btn_crud, text="Cập Nhật", command=lambda: luu_sv(), height=2, bg="#007BFF", fg="white", font=("Arial", 9, "bold"), relief=tk.FLAT).pack(fill=tk.X, pady=3)
     tk.Button(frame_btn_crud, text="Hủy", command=lambda: clear_input(), height=2, bg="#007BFF", fg="white", font=("Arial", 9, "bold"), relief=tk.FLAT).pack(fill=tk.X, pady=3)
     tk.Button(frame_btn_crud, text="Xóa", command=lambda: xoa_sv(), height=2, bg="#DC3545", fg="white", font=("Arial", 9, "bold"), relief=tk.FLAT).pack(fill=tk.X, pady=3)
     tk.Button(frame_btn_crud, text="Tìm Kiếm", command=lambda: timkiem(), height=2, bg="#FFC107", fg="white", font=("Arial", 9, "bold"), relief=tk.FLAT).pack(fill=tk.X, pady=3)
@@ -121,6 +120,7 @@ def open_main_window():
     tk.Button(frame_Button_Morong, text="Thoát", width=12, command=root.quit, bg="#DC3545", fg="white", relief=tk.FLAT, font=("Arial", 9, "bold")).grid(row=0, column=3, padx=10, pady=5)
 
     def clear_input(): 
+        entry_mssv.config(state='normal')  
         entry_mssv.delete(0, tk.END) 
         entry_hoten.delete(0, tk.END) 
         gender_var.set("Nam") 
@@ -129,6 +129,31 @@ def open_main_window():
         entry_lop.delete(0, tk.END)
         if tree.selection():
             tree.selection_remove(tree.selection()[0])
+
+    def fill_form_from_tree(event=None): 
+        selected = tree.selection() 
+        if not selected: 
+            return
+        values = tree.item(selected)["values"]
+
+        entry_mssv.config(state='normal') 
+        entry_mssv.delete(0, tk.END) 
+        entry_hoten.delete(0, tk.END) 
+        entry_lop.delete(0, tk.END)
+
+        entry_mssv.insert(0, values[0]) 
+        entry_hoten.insert(0, values[1]) 
+        
+        try:
+            entry_date.set_date(values[2])
+        except:
+            pass 
+            
+        gender_var.set(values[3])
+        cbb_khoa.set(values[4])
+        entry_lop.insert(0, values[5])
+        
+        entry_mssv.config(state='disabled') 
 
     def load_data():
         for i in tree.get_children():
@@ -141,6 +166,10 @@ def open_main_window():
         conn.close()
 
     def them_sv():
+        if entry_mssv['state'] == 'disabled':
+            clear_input()
+            messagebox.showinfo("Hướng dẫn", "Đã làm mới form. Vui lòng nhập thông tin sinh viên mới.", parent=root)
+            return
         mssv = entry_mssv.get()
         hoten = entry_hoten.get()
         gioitinh = gender_var.get()
@@ -195,26 +224,7 @@ def open_main_window():
         finally:
             if conn:
                 conn.close()
-
-    def sua_sv(): 
-        selected = tree.selection() 
-        if not selected: 
-            messagebox.showwarning("Chưa chọn", "Hãy chọn sinh viên để sửa", parent=root) 
-            return 
-        values = tree.item(selected)["values"]
-
-        entry_mssv.delete(0, tk.END) 
-        entry_hoten.delete(0, tk.END) 
-        entry_lop.delete(0, tk.END)
-
-
-        entry_mssv.insert(0, values[0]) 
-        entry_hoten.insert(0, values[1]) 
-        entry_date.set_date(values[2])
-        gender_var.set(values[3])
-        cbb_khoa.set(values[4])
-        entry_lop.insert(0, values[5])
-
+                
     def luu_sv():
         mssv = entry_mssv.get()
         hoten = entry_hoten.get()
@@ -222,31 +232,25 @@ def open_main_window():
         ngaysinh = entry_date.get()
         khoa = cbb_khoa.get()
         lop = entry_lop.get()
-        
         if mssv == "":
-            messagebox.showwarning("Lỗi", "Hãy dùng nút 'Sửa' trước khi 'Lưu'", parent=root)
+            messagebox.showwarning("Lỗi", "Vui lòng chọn sinh viên từ danh sách để sửa!", parent=root)
             return
 
         conn = connect_db()
         cur = conn.cursor()
         try:
             cur.execute("""UPDATE sinhvien SET hoten=%s, ngaysinh=%s, gioitinh=%s, khoa=%s, lop=%s
-                        WHERE mssv=%s""",
+                           WHERE mssv=%s""",
                         (hoten, ngaysinh, gioitinh, khoa, lop, mssv))
             conn.commit()
+            messagebox.showinfo("Thành công", "Cập nhật thông tin thành công!", parent=root)
             load_data()
-            clear_input()
+            clear_input() 
         except Exception as e:
             conn.rollback()
             messagebox.showerror("Lỗi CSDL", f"Lỗi khi lưu: {e}", parent=root)
         finally:
             conn.close()
-
-    def on_tree_select(event):
-        selected = tree.selection()
-        if not selected:
-            return
-        sua_sv()
     def timkiem():
         mssv = entry_mssv.get()
         if mssv == "":
@@ -263,6 +267,5 @@ def open_main_window():
         for row in results:
             tree.insert("", tk.END, values=row)
         conn.close()
-    tree.bind("<<TreeviewSelect>>", on_tree_select)
-    # load_data() 
+    tree.bind("<<TreeviewSelect>>", fill_form_from_tree)
     root.mainloop()
