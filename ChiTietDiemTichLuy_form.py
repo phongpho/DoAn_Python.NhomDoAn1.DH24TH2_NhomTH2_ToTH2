@@ -293,6 +293,20 @@ def open_ChiTietDiemTichLuy(main_root):
             if conn:
                 conn.close()
 
+    def on_tree_select(event):
+        selected = tree.selection()
+        if not selected:
+            return
+        
+        item = tree.item(selected[0])
+        values = item["values"]
+
+        cbb_khoa.set("")
+        cbb_sinhvien.set(f"{values[0]} - ")
+        cbb_monhoc.set(f"{values[1]} - {values[2]}")
+        entry_diem.delete(0, tk.END)
+        entry_diem.insert(0, str(values[4]))
+        
     def xoa_diem():
         selected_item = tree.selection()
         if not selected_item:
@@ -327,8 +341,8 @@ def open_ChiTietDiemTichLuy(main_root):
         finally:
             if conn:
                 conn.close()
-
+    
     cbb_khoa.bind("<<ComboboxSelected>>", on_khoa_select)
     cbb_sinhvien.bind("<<ComboboxSelected>>", on_student_select)
-    
+    tree.bind("<<TreeviewSelect>>", on_tree_select)
     load_cbb_khoa()
